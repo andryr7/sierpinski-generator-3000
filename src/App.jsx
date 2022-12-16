@@ -1,6 +1,16 @@
 import styled from "styled-components";
 import { useEffect, useState, useRef } from 'react';
 import { useMousePosition } from './useMousePosition';
+import Draggable from "react-draggable";
+
+const colors = {
+  pink: '#FF61C6',
+  lightblue: '#5CECFF',
+  yellow: '#F4FF61',
+  orange: '#FF9900',
+  blue: '#375971',
+  darkblue: '#0A0C37',
+}
 
 const StyledApp = styled.div`
   width: 100%;
@@ -9,29 +19,72 @@ const StyledApp = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  &.done {
-    background-image: url('../public/isis.jpg');
-    background-size: cover;
-  }
+  background-image: url('../public/bggrid.jpg');
+  background-size: cover;
+  overflow: hidden;
+  background-color: ${colors.darkblue};
+`
+
+const StyledAppTitle = styled.h1`
+  position: absolute;
+  top: 5vh;
+  font-size: 7vw;
+  font-family: 'Broadway Gradient 3D', sans-serif;
+  color: ${colors.lightblue};
+`
+
+const StyledAppInstructions = styled.span`
+  position: absolute;
+  bottom: 5vh;
+  font-size: 3.5rem;
+  color: ${colors.lightblue};
 `
 
 const StyledControlPanel = styled.div`
-  background-color: lightgrey;
+  background-color: ${colors.darkblue};
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  gap: 1rem;
   font-size: 2rem;
-  position: fixed;
-  top: 50%;
+  position: absolute;
+  top: 0;
   left: 0;
+  border: 1px solid ${colors.lightblue};
+  padding: 1rem;
+  cursor: grab;
+  color: ${colors.lightblue};
+  & input {
+    border: inherit;
+    width: 6rem;
+    font-size: 1rem;
+    background-color: ${colors.darkblue};
+    color: inherit;
+  }
+`
+
+const StyledCPButton = styled.div`
+  border: 1px outset;
+  padding: 1rem;
+  /* border-radius: 15px; */
+  cursor: pointer;
+  width: 90%;
+  text-align: center;
+  &:hover {
+    color: ${colors.pink}
+  }
 `
 
 const StyledDrawingContainer = styled.div`
+cursor: auto;
+&.drawing {
+  cursor: crosshair;
+}
 `
 
 function App() {
-  const [generatorStep, setGeneratorStep] = useState(1);
+  const [generatorStep, setGeneratorStep] = useState(0);
 
   // Mouse coordinates
   const mouseCoords= useMousePosition();
@@ -44,15 +97,9 @@ function App() {
 
   // Generator options and variables
   const [newPointsCount, setNewPointsCount] = useState(100);
-  const [precision, setPrecision] = useState(100);
 
   // Drawn point list
-  const [pointList, setPointList] = useState([
-    firstPoint.current, 
-    secondPoint.current, 
-    thirdPoint.current, 
-    startPoint.current
-  ]);
+  const [pointList, setPointList] = useState([]);
 
   // Point generation functions
   const getRandomPoint = () => {
@@ -73,8 +120,8 @@ function App() {
       const referencepoint = getRandomPoint();
       const newPoint = {
         id: lastPoint.id + 1,
-        x: Math.round((lastPoint.x + referencepoint.x)/2*precision)/precision,
-        y: Math.round((lastPoint.y + referencepoint.y)/2*precision)/precision,
+        x: Math.round((lastPoint.x + referencepoint.x)/2*100)/100,
+        y: Math.round((lastPoint.y + referencepoint.y)/2*100)/100,
       };
       lastPoint = newPoint;
       newPoints.push(newPoint);
@@ -87,75 +134,95 @@ function App() {
     secondPoint.current = {id: 2, x: 0, y: 0};
     thirdPoint.current = {id: 3, x: 0, y: 0};
     startPoint.current = {id: 4, x: 0, y: 0};
-    setGeneratorStep(1);
-    setPointList([
-      firstPoint.current, 
-      secondPoint.current, 
-      thirdPoint.current, 
-      startPoint.current
-    ])
-  }
+    setGeneratorStep(0);
+    setPointList([]);
+  };
 
 
   // Generator engine
   const handleGeneratorStart = () => {
     switch (generatorStep) {
+      case 0:
+        break;
       case 1:
         firstPoint.current.x = mouseCoords.x;
         firstPoint.current.y = mouseCoords.y;
+        setPointList((current)=>[...current, firstPoint.current]);
         setGeneratorStep(2);
         break;
       case 2:
         secondPoint.current.x = mouseCoords.x;
         secondPoint.current.y = mouseCoords.y;
+        setPointList((current)=>[...current, secondPoint.current]);
         setGeneratorStep(3);
         break;
       case 3:
         thirdPoint.current.x = mouseCoords.x;
         thirdPoint.current.y = mouseCoords.y;
+        startPoint.current.x = firstPoint.current.x;
+        startPoint.current.y = firstPoint.current.y;
+        // startPoint.current.x = (firstPoint.current.x + secondPoint.current.x + thirdPoint.current.x) / 3;
+        // startPoint.current.y = (firstPoint.current.y + secondPoint.current.y + thirdPoint.current.y) / 3;
+        setPointList((current)=>[...current, thirdPoint.current]);
         setGeneratorStep(4);
         break;
       case 4:
-        startPoint.current.x = mouseCoords.x;
-        startPoint.current.y = mouseCoords.y;
-        setGeneratorStep(5);
         break;
-      case 5:
-        break;
+    }
+  }
+
+  const handlePointsCountChange = (event) => {
+    if (event.target.value < 1000) {
+    setNewPointsCount(event.target.value);
+    }
+    else {
+      setNewPointsCount(999);
+    };
+  };
+
+  const getInstruction = () => {
+    switch (generatorStep) {
+      case 0:
+        return "Click start";
+      case 1:
+        return "Draw the first point";
+      case 2:
+        return "Draw the second point";
+      case 3:
+        return "Draw the third point";
+      case 4:
+        return "Click draw points";
     }
   }
 
   return (
     <StyledApp onClick={handleGeneratorStart} className={pointList.length>2000?'done':''}>
-      <StyledControlPanel>
-        <h2>Control Panel</h2>
-        <span>Step: {generatorStep}</span>
-        <span>global X: {mouseCoords.x}</span>
-        <span>global Y: {mouseCoords.y}</span>
-        <span>First point: X={firstPoint.current.x} Y={firstPoint.current.y}</span>
-        <span>Second point: X={secondPoint.current.x} Y={secondPoint.current.y}</span>
-        <span>Third point: X={thirdPoint.current.x} Y={thirdPoint.current.y}</span>
-        <span>Start point: X={startPoint.current.x} Y={startPoint.current.y}</span>
-        <span>Points: {pointList.length}</span>
-        <button onClick={clearGenerator}>Clear</button>
-        <button onClick={drawNewPoints}>Draw points</button>
-        <button onClick={()=>{setGeneratorStep(1)}}>Another one</button>
-      </StyledControlPanel>
-      <StyledDrawingContainer>
+      <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
+      <Draggable bounds="parent">
+        <StyledControlPanel>
+          <h2>Control Panel</h2>
+          <span>{getInstruction()}</span>
+          <label for="quantity">New points count:</label>
+          <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
+          <span>Points : {pointList.length}</span>
+          <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
+          <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
+          <StyledCPButton color="yellow" onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
+          <StyledCPButton color="blue" onClick={drawNewPoints}>Draw points</StyledCPButton>
+        </StyledControlPanel>
+      </Draggable>
+      <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           height={window.innerHeight - 2}
           width={window.innerWidth }
         >
           {pointList.map((point)=>(
-            <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke="black" fill="black" strokeWidth="2"/>
+            <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke={colors.pink} fill={colors.pink} strokeWidth="2"/>
           ))}
-          
-          <circle cx={firstPoint.current.x} cy={firstPoint.current.y} r="1" stroke="black" fill="black" strokeWidth="50"/>
-          <circle cx={secondPoint.current.x} cy={secondPoint.current.y} r="1" stroke="black" fill="black" strokeWidth="50"/>
-          <circle cx={thirdPoint.current.x} cy={thirdPoint.current.y} r="1" stroke="black" fill="black" strokeWidth="50"/>
         </svg>
       </StyledDrawingContainer>
+      <StyledAppInstructions>{getInstruction()}</StyledAppInstructions>
     </StyledApp>
   )
 }
