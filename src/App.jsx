@@ -305,7 +305,7 @@ function App() {
 
   return (
     <>
-      <StyledMobileWarning>This website only works on desktop and tablets for now. Sorry !</StyledMobileWarning>
+      <StyledMobileWarning>This website only works on desktop and tablets for now.</StyledMobileWarning>
       <StyledApp onClick={handleGeneratorStart}>
         <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
         {/* <Draggable bounds="parent"> */}
