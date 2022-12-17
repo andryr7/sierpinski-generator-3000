@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useEffect, useState, useRef } from 'react';
 import SierpinskiBackground from './assets/bggrid.jpg';
 import { device, colors } from './style/stylevars';
-import { useMousePosition } from './utils/useMousePosition';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -15,13 +14,9 @@ const StyledApp = styled.div`
   background-size: cover;
   background-position: center;
   background-color: ${colors.darkblue};
-  @media ${device.mobile} {
+  /* @media ${device.mobile} {
     filter: blur(1rem);
-    &::after {
-      content:'TEST';
-      filter: none;
-    }
-  };
+  }; */
 `
 
 const StyledMobileWarning = styled.div`
@@ -159,15 +154,10 @@ const StyledDrawingContainer = styled.div`
 `
 
 function App() {
-  // Mouse coordinates
-  const mouseCoords = useMousePosition();
   const [triangles, setTriangles] = useState([]);
-  
-  // Generator options and variables
   const [generatorStep, setGeneratorStep] = useState(0);
   const [newPointsCount, setNewPointsCount] = useState(25);
   const [pointColor, setPointColor] = useState(colors.pink);
-  // const [pointsCount, setPointsCount] = useState(0);
   let pointsCount = useRef(0);
   let lastPoint = useRef({});
 
@@ -206,7 +196,7 @@ function App() {
   };
 
   // Generator engine
-  const generatorStart = () => {
+  const generatorStart = (event) => {
     switch (generatorStep) {
       case 0:
         break;
@@ -217,8 +207,8 @@ function App() {
           points: [
             {
               id: 0,
-              x: mouseCoords.x,
-              y: mouseCoords.y,
+              x: event.clientX,
+              y: event.clientY,
             }
           ]
         };
@@ -230,8 +220,8 @@ function App() {
         const newtriangle2 = triangles.pop();
         newtriangle2.points.push({
           id: 1,
-          x: mouseCoords.x,
-          y: mouseCoords.y,
+          x: event.clientX,
+          y: event.clientY,
         });
         pointsCount.current++;
         setTriangles(current=>[...current, newtriangle2]);
@@ -241,8 +231,8 @@ function App() {
         const newtriangle3 = triangles.pop();
         const newPoint = {
           id: 2,
-          x: mouseCoords.x,
-          y: mouseCoords.y,
+          x: event.clientX,
+          y: event.clientY,
         }
         pointsCount.current++;
         newtriangle3.points.push(newPoint);
@@ -253,10 +243,6 @@ function App() {
       case 4:
         break;
     }
-  };
-
-  const handleGeneratorStart = () => {
-    generatorStart();
   };
 
   const clearGenerator = () => {
@@ -291,22 +277,10 @@ function App() {
     }
   };
 
-  // Listening for screen size changes to reset app data
-  // useEffect(()=>{
-  //   window.addEventListener('resize', clearGenerator);
-  //   return () => {
-  //     window.removeEventListener('resize', clearGenerator);
-  //   };
-  // });
-
-  useEffect(()=>{
-    console.log('render');
-  })
-
   return (
     <>
-      <StyledMobileWarning>This website only works on desktop and tablets for now.</StyledMobileWarning>
-      <StyledApp onClick={handleGeneratorStart}>
+      {/* <StyledMobileWarning>This website only works on desktop and tablets for now.</StyledMobileWarning> */}
+      <StyledApp onClick={generatorStart}>
         <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
         {/* <Draggable bounds="parent"> */}
           <StyledControlPanel>
@@ -329,8 +303,8 @@ function App() {
         <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            height={window.innerHeight - 2}
-            width={window.innerWidth }
+            height={window.innerHeight}
+            width={window.innerWidth}
           >
             {triangles.map(triangle=>(
               triangle.points.map(point=>(
