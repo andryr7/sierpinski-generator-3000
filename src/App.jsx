@@ -99,14 +99,13 @@ const StyledControlPanel = styled.div`
   @media ${device.tablet} {
     font-size: 1.5rem;
     padding: 0.5rem;
-    gap: 0.5rem;
   };
   @media ${device.mobile} {
     font-size: 1rem;
     flex-direction: row;
     padding: 0.5rem;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.25rem;
     bottom: 0;
   };
 `
@@ -133,6 +132,10 @@ const StyledColorPicker = styled.div`
   text-align: center;
   display: flex;
   justify-content: space-between;
+  @media ${device.mobile} {
+    padding: 0;
+    border: none;
+  };
 `
 
 const StyledColorButton = styled.div`
@@ -143,6 +146,10 @@ const StyledColorButton = styled.div`
   cursor: pointer;
   &:hover {
     color: ${colors.pink}
+  };
+  @media ${device.mobile} {
+    height: 2rem;
+    width: 2rem;
   };
 `
 
