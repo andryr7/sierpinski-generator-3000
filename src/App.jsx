@@ -119,7 +119,6 @@ const StyledControlPanel = styled.div`
 const StyledCPButton = styled.div`
   border: 1px outset;
   padding: 1rem;
-  /* border-radius: 15px; */
   cursor: pointer;
   width: 90%;
   text-align: center;
@@ -131,101 +130,145 @@ const StyledCPButton = styled.div`
   };
 `
 
+const StyledColorPicker = styled.div`
+  border: 1px outset;
+  padding: 1rem;
+  cursor: pointer;
+  width: 90%;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+`
+
+const StyledColorButton = styled.div`
+  background-color: ${props=>props.color};
+  border: 1px outset;
+  height: 3rem;
+  width: 3rem;
+  cursor: pointer;
+  &:hover {
+    color: ${colors.pink}
+  };
+`
+
 const StyledDrawingContainer = styled.div`
-cursor: auto;
-&.drawing {
-  cursor: crosshair;
-}
+  cursor: auto;
+  &.drawing {
+    cursor: crosshair;
+  }
 `
 
 function App() {
   // Mouse coordinates
-  const mouseCoords= useMousePosition();
-
-  // Starting points variables
-  const firstPoint = useRef({id: 1, x: 0, y: 0});
-  const secondPoint = useRef({id: 2, x: 0, y: 0});
-  const thirdPoint = useRef({id: 3, x: 0, y: 0});
-
+  const mouseCoords = useMousePosition();
+  const [triangles, setTriangles] = useState([]);
+  
   // Generator options and variables
-  const [newPointsCount, setNewPointsCount] = useState(25);
   const [generatorStep, setGeneratorStep] = useState(0);
-
-  // Drawn point list
-  const [pointList, setPointList] = useState([]);
+  const [newPointsCount, setNewPointsCount] = useState(25);
+  const [pointColor, setPointColor] = useState(colors.pink);
+  // const [pointsCount, setPointsCount] = useState(0);
+  let pointsCount = useRef(0);
+  let lastPoint = useRef({});
 
   // Point generation functions
-  const getRandomPoint = () => {
+  const getRandomPoint = (triangle) => {
     switch (Math.floor(Math.random() * 3)) {
       case 0:
-        return (firstPoint.current);
+        return (triangle.points.find(point=>point.id===0));
       case 1:
-        return (secondPoint.current);
+        return (triangle.points.find(point=>point.id===1));
       case 2:
-        return (thirdPoint.current);
+        return (triangle.points.find(point=>point.id===2));
     };
   };
 
   const drawNewPoints = () => {
-    let lastPoint = pointList[pointList.length-1];
     let newPoints = [];
     for (let pas = 0; pas < newPointsCount; pas++) {
-      const referencepoint = getRandomPoint();
+      const referencepoint = getRandomPoint(triangles[triangles.length-1]);
       const newPoint = {
-        id: lastPoint.id + 1,
-        x: Math.round((lastPoint.x + referencepoint.x)/2*100)/100,
-        y: Math.round((lastPoint.y + referencepoint.y)/2*100)/100,
+        id: lastPoint.current.id + 1,
+        x: Math.round((lastPoint.current.x + referencepoint.x)/2*100)/100,
+        y: Math.round((lastPoint.current.y + referencepoint.y)/2*100)/100,
       };
-      lastPoint = newPoint;
+      lastPoint.current = newPoint;
+      pointsCount.current++;
       newPoints.push(newPoint);
     };
-    setPointList((current)=>[...current, ...newPoints]);
+    const updatedTriangle = triangles.pop();
+    updatedTriangle.points.push(...newPoints);
+    setTriangles(current=>[...current, updatedTriangle]);
   };
 
   const handleDrawPointsClick = () => {
     generatorStep===4 && drawNewPoints();
-  }
+  };
 
   // Generator engine
-  const handleGeneratorStart = () => {
+  const generatorStart = () => {
     switch (generatorStep) {
       case 0:
         break;
       case 1:
-        firstPoint.current.x = mouseCoords.x;
-        firstPoint.current.y = mouseCoords.y;
-        setPointList((current)=>[...current, firstPoint.current]);
+        const newtriangle = {
+          id: 0,
+          color: pointColor,
+          points: [
+            {
+              id: 0,
+              x: mouseCoords.x,
+              y: mouseCoords.y,
+            }
+          ]
+        };
+        pointsCount.current++;
+        setTriangles(current=>[...current, newtriangle]);
         setGeneratorStep(2);
         break;
       case 2:
-        secondPoint.current.x = mouseCoords.x;
-        secondPoint.current.y = mouseCoords.y;
-        setPointList((current)=>[...current, secondPoint.current]);
+        const newtriangle2 = triangles.pop();
+        newtriangle2.points.push({
+          id: 1,
+          x: mouseCoords.x,
+          y: mouseCoords.y,
+        });
+        pointsCount.current++;
+        setTriangles(current=>[...current, newtriangle2]);
         setGeneratorStep(3);
         break;
       case 3:
-        thirdPoint.current.x = mouseCoords.x;
-        thirdPoint.current.y = mouseCoords.y;
-        setPointList((current)=>[...current, thirdPoint.current]);
+        const newtriangle3 = triangles.pop();
+        const newPoint = {
+          id: 2,
+          x: mouseCoords.x,
+          y: mouseCoords.y,
+        }
+        pointsCount.current++;
+        newtriangle3.points.push(newPoint);
+        lastPoint.current = newPoint;
+        setTriangles(current=>[...current, newtriangle3]);
         setGeneratorStep(4);
         break;
       case 4:
         break;
     }
-  }
+  };
+
+  const handleGeneratorStart = () => {
+    generatorStart();
+  };
 
   const clearGenerator = () => {
-    firstPoint.current = {id: 1, x: 0, y: 0};
-    secondPoint.current = {id: 2, x: 0, y: 0};
-    thirdPoint.current = {id: 3, x: 0, y: 0};
+    pointsCount.current = 0; 
     setGeneratorStep(0);
-    setPointList([]);
+    setTriangles([]);
   };
 
   // Points count input control
   const handlePointsCountChange = (event) => {
     if (event.target.value < 1000) {
-    setNewPointsCount(event.target.value);
+      setNewPointsCount(event.target.value);
     }
     else {
       setNewPointsCount(999);
@@ -246,7 +289,7 @@ function App() {
       case 4:
         return "Click the draw points button";
     }
-  }
+  };
 
   // Listening for screen size changes to reset app data
   // useEffect(()=>{
@@ -255,6 +298,10 @@ function App() {
   //     window.removeEventListener('resize', clearGenerator);
   //   };
   // });
+
+  useEffect(()=>{
+    console.log('render');
+  })
 
   return (
     <>
@@ -267,10 +314,15 @@ function App() {
             <span className="mobile-instructions">{getInstruction()}</span>
             <label htmlFor="quantity">New points count:</label>
             <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
-            <span>Points : {pointList.length}</span>
+            <span>Points : {pointsCount.current}</span>
+            <StyledColorPicker>
+              <StyledColorButton color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
+              <StyledColorButton color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
+              <StyledColorButton color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
+              <StyledColorButton color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
+            </StyledColorPicker>
             <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
             <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
-            <StyledCPButton color="yellow" onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
             <StyledCPButton color="blue" onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
           </StyledControlPanel>
         {/* </Draggable> */}
@@ -280,8 +332,10 @@ function App() {
             height={window.innerHeight - 2}
             width={window.innerWidth }
           >
-            {pointList.map((point)=>(
-              <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke={colors.pink} fill={colors.pink} strokeWidth="2"/>
+            {triangles.map(triangle=>(
+              triangle.points.map(point=>(
+                <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke={triangle.color} fill={triangle.color} strokeWidth="2"/>
+              ))
             ))}
           </svg>
         </StyledDrawingContainer>
