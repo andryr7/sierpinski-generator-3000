@@ -1,16 +1,8 @@
 import styled from "styled-components";
 import { useEffect, useState, useRef } from 'react';
-import { useMousePosition } from './useMousePosition';
-import Draggable from "react-draggable";
-
-const colors = {
-  pink: '#FF61C6',
-  lightblue: '#5CECFF',
-  yellow: '#F4FF61',
-  orange: '#FF9900',
-  blue: '#375971',
-  darkblue: '#0A0C37',
-}
+import SierpinskiBackground from './assets/bggrid.jpg';
+import { device, colors } from './style/stylevars';
+import { useMousePosition } from './utils/useMousePosition';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -19,18 +11,49 @@ const StyledApp = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: url('../public/bggrid.jpg');
+  background-image: url(${SierpinskiBackground});
   background-size: cover;
-  overflow: hidden;
+  background-position: center;
   background-color: ${colors.darkblue};
+  @media ${device.mobile} {
+    filter: blur(1rem);
+    &::after {
+      content:'TEST';
+      filter: none;
+    }
+  };
+`
+
+const StyledMobileWarning = styled.div`
+  display: none;
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  @media ${device.mobile} {
+    display: flex;
+    color: ${colors.pink};
+    font-size: 2.5rem;
+    text-align: center;
+  };
 `
 
 const StyledAppTitle = styled.h1`
   position: absolute;
   top: 5vh;
-  font-size: 7vw;
+  font-size: 7rem;
   font-family: 'Broadway Gradient 3D', sans-serif;
   color: ${colors.lightblue};
+  text-align: center;
+  @media ${device.tablet} {
+    top: 2vh;
+    font-size: 4rem;
+  };
+  @media ${device.mobile} {
+    font-size: 3rem;
+  };
 `
 
 const StyledAppInstructions = styled.span`
@@ -38,6 +61,10 @@ const StyledAppInstructions = styled.span`
   bottom: 5vh;
   font-size: 3.5rem;
   color: ${colors.lightblue};
+  text-align: center;
+  @media ${device.mobile} {
+    display: none;
+  };
 `
 
 const StyledControlPanel = styled.div`
@@ -49,19 +76,44 @@ const StyledControlPanel = styled.div`
   gap: 1rem;
   font-size: 2rem;
   position: absolute;
-  top: 0;
   left: 0;
   border: 1px solid ${colors.lightblue};
   padding: 1rem;
-  cursor: grab;
+  /* cursor: grab; */
   color: ${colors.lightblue};
+  box-sizing: border-box;
   & input {
     border: inherit;
     width: 6rem;
     font-size: 1rem;
     background-color: ${colors.darkblue};
     color: inherit;
+  };
+  & h2 {
+    color: ${colors.pink};
+    @media ${device.mobile} {
+      display: none;
+    };
   }
+  & span.mobile-instructions {
+    display: none;
+    @media ${device.tablet} {
+    display: block;
+    };
+  }
+  @media ${device.tablet} {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  };
+  @media ${device.mobile} {
+    font-size: 1rem;
+    flex-direction: row;
+    padding: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    bottom: 0;
+  };
 `
 
 const StyledCPButton = styled.div`
@@ -73,7 +125,10 @@ const StyledCPButton = styled.div`
   text-align: center;
   &:hover {
     color: ${colors.pink}
-  }
+  };
+  @media ${device.mobile} {
+    padding: 0.5rem;
+  };
 `
 
 const StyledDrawingContainer = styled.div`
@@ -84,8 +139,6 @@ cursor: auto;
 `
 
 function App() {
-  const [generatorStep, setGeneratorStep] = useState(0);
-
   // Mouse coordinates
   const mouseCoords= useMousePosition();
 
@@ -93,10 +146,10 @@ function App() {
   const firstPoint = useRef({id: 1, x: 0, y: 0});
   const secondPoint = useRef({id: 2, x: 0, y: 0});
   const thirdPoint = useRef({id: 3, x: 0, y: 0});
-  const startPoint = useRef({id: 4, x: 0, y: 0});
 
   // Generator options and variables
-  const [newPointsCount, setNewPointsCount] = useState(100);
+  const [newPointsCount, setNewPointsCount] = useState(25);
+  const [generatorStep, setGeneratorStep] = useState(0);
 
   // Drawn point list
   const [pointList, setPointList] = useState([]);
@@ -129,15 +182,9 @@ function App() {
     setPointList((current)=>[...current, ...newPoints]);
   };
 
-  const clearGenerator = () => {
-    firstPoint.current = {id: 1, x: 0, y: 0};
-    secondPoint.current = {id: 2, x: 0, y: 0};
-    thirdPoint.current = {id: 3, x: 0, y: 0};
-    startPoint.current = {id: 4, x: 0, y: 0};
-    setGeneratorStep(0);
-    setPointList([]);
-  };
-
+  const handleDrawPointsClick = () => {
+    generatorStep===4 && drawNewPoints();
+  }
 
   // Generator engine
   const handleGeneratorStart = () => {
@@ -159,10 +206,6 @@ function App() {
       case 3:
         thirdPoint.current.x = mouseCoords.x;
         thirdPoint.current.y = mouseCoords.y;
-        startPoint.current.x = firstPoint.current.x;
-        startPoint.current.y = firstPoint.current.y;
-        // startPoint.current.x = (firstPoint.current.x + secondPoint.current.x + thirdPoint.current.x) / 3;
-        // startPoint.current.y = (firstPoint.current.y + secondPoint.current.y + thirdPoint.current.y) / 3;
         setPointList((current)=>[...current, thirdPoint.current]);
         setGeneratorStep(4);
         break;
@@ -171,6 +214,15 @@ function App() {
     }
   }
 
+  const clearGenerator = () => {
+    firstPoint.current = {id: 1, x: 0, y: 0};
+    secondPoint.current = {id: 2, x: 0, y: 0};
+    thirdPoint.current = {id: 3, x: 0, y: 0};
+    setGeneratorStep(0);
+    setPointList([]);
+  };
+
+  // Points count input control
   const handlePointsCountChange = (event) => {
     if (event.target.value < 1000) {
     setNewPointsCount(event.target.value);
@@ -180,6 +232,7 @@ function App() {
     };
   };
 
+  // Instructions
   const getInstruction = () => {
     switch (generatorStep) {
       case 0:
@@ -191,39 +244,50 @@ function App() {
       case 3:
         return "Draw the third point";
       case 4:
-        return "Click draw points";
+        return "Click the draw points button";
     }
   }
 
+  // Listening for screen size changes to reset app data
+  // useEffect(()=>{
+  //   window.addEventListener('resize', clearGenerator);
+  //   return () => {
+  //     window.removeEventListener('resize', clearGenerator);
+  //   };
+  // });
+
   return (
-    <StyledApp onClick={handleGeneratorStart} className={pointList.length>2000?'done':''}>
-      <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
-      <Draggable bounds="parent">
-        <StyledControlPanel>
-          <h2>Control Panel</h2>
-          <span>{getInstruction()}</span>
-          <label for="quantity">New points count:</label>
-          <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
-          <span>Points : {pointList.length}</span>
-          <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
-          <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
-          <StyledCPButton color="yellow" onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
-          <StyledCPButton color="blue" onClick={drawNewPoints}>Draw points</StyledCPButton>
-        </StyledControlPanel>
-      </Draggable>
-      <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          height={window.innerHeight - 2}
-          width={window.innerWidth }
-        >
-          {pointList.map((point)=>(
-            <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke={colors.pink} fill={colors.pink} strokeWidth="2"/>
-          ))}
-        </svg>
-      </StyledDrawingContainer>
-      <StyledAppInstructions>{getInstruction()}</StyledAppInstructions>
-    </StyledApp>
+    <>
+      <StyledMobileWarning>This website only works on desktop and tablets for now. Sorry !</StyledMobileWarning>
+      <StyledApp onClick={handleGeneratorStart}>
+        <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
+        {/* <Draggable bounds="parent"> */}
+          <StyledControlPanel>
+            <h2>Control Panel</h2>
+            <span className="mobile-instructions">{getInstruction()}</span>
+            <label htmlFor="quantity">New points count:</label>
+            <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
+            <span>Points : {pointList.length}</span>
+            <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
+            <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
+            <StyledCPButton color="yellow" onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
+            <StyledCPButton color="blue" onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
+          </StyledControlPanel>
+        {/* </Draggable> */}
+        <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            height={window.innerHeight - 2}
+            width={window.innerWidth }
+          >
+            {pointList.map((point)=>(
+              <circle key={point.id} cx={point.x} cy={point.y} r="1" stroke={colors.pink} fill={colors.pink} strokeWidth="2"/>
+            ))}
+          </svg>
+        </StyledDrawingContainer>
+        <StyledAppInstructions>{getInstruction()}</StyledAppInstructions>
+      </StyledApp>
+    </>
   )
 }
 
