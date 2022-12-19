@@ -1,7 +1,8 @@
 import styled from "styled-components";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import SierpinskiBackground from './assets/bggrid.jpg';
 import { device, colors } from './style/stylevars';
+import Draggable from 'react-draggable';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -38,9 +39,6 @@ const StyledAppInstructions = styled.span`
   font-size: 3.5rem;
   color: ${colors.lightblue};
   text-align: center;
-  @media ${device.mobile} {
-    display: none;
-  };
 `
 
 const StyledControlPanel = styled.div`
@@ -50,57 +48,33 @@ const StyledControlPanel = styled.div`
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  font-size: 2rem;
+  font-size: 1.5rem;
   position: absolute;
   left: 0;
   border: 1px solid ${colors.lightblue};
   padding: 1rem;
-  /* cursor: grab; */
   color: ${colors.lightblue};
   box-sizing: border-box;
+  cursor: grab;
+  & h2 {
+    color: ${colors.pink};
+  };
   & input {
     border: inherit;
     width: 6rem;
     font-size: 2rem;
     background-color: ${colors.darkblue};
     color: inherit;
-    @media ${device.mobile} {
-      font-size: 1.5rem;
-    };
-  };
-  & h2 {
-    color: ${colors.pink};
-    @media ${device.tablet} {
-      display: none;
-    };
-  }
-  & span.mobile-instructions {
-    display: none;
-    @media ${device.tablet} {
-      display: block;
-    };
-  }
-  @media ${device.tablet} {
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    gap: 0.25rem;
-  };
-  @media ${device.mobile} {
-    font-size: 1.5rem;
-    flex-direction: row;
-    padding: 0.5rem;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    bottom: 0;
   };
 `
 
 const StyledCPButton = styled.div`
   border: 1px outset;
+  width: 100%;
   padding: 1rem;
   cursor: pointer;
-  width: 90%;
   text-align: center;
+  box-sizing: border-box;
   &:hover {
     color: ${colors.pink}
   };
@@ -117,24 +91,17 @@ const StyledCPButton = styled.div`
 `
 
 const StyledColorPicker = styled.div`
-  border: 1px outset;
-  padding: 1rem;
   cursor: pointer;
-  width: 90%;
-  text-align: center;
   display: flex;
   justify-content: space-between;
-  @media ${device.mobile} {
-    padding: 0;
-    border: none;
-  };
+  width: 100%;
 `
 
 const StyledColorButton = styled.div`
   background-color: ${props=>props.color};
   border: 2px outset;
-  height: 3rem;
-  width: 3rem;
+  height: 2rem;
+  width: 2rem;
   cursor: pointer;
   &:hover {
     color: ${colors.pink}
@@ -162,8 +129,26 @@ function App() {
   const [pointColor, setPointColor] = useState(colors.pink);
   let pointsCount = useRef(0);
   let lastPoint = useRef({});
+  const [dimensions, setDimensions] = useState({height: window.innerHeight,width: window.innerWidth});
+
+  // Listening for screen size changes to re-render page
+
+  useEffect(()=>{
+    window.addEventListener('resize', handleWindowResize);
+    return () => {
+      window.removeEventListener('resize', handleWindowResize);
+    };
+  });
+
+  const handleWindowResize = () => {
+    setDimensions({
+      height: window.innerHeight,
+      width: window.innerWidth,
+    })
+  };
 
   // Point generation functions
+
   const getRandomPoint = (triangle) => {
     switch (Math.floor(Math.random() * 3)) {
       case 0:
@@ -198,6 +183,7 @@ function App() {
   };
 
   // Generator engine
+
   const generatorStart = (event) => {
     switch (generatorStep) {
       case 0:
@@ -254,6 +240,7 @@ function App() {
   };
 
   // Points count input control
+
   const handlePointsCountChange = (event) => {
     if (event.target.value < 1000) {
       setNewPointsCount(event.target.value);
@@ -263,7 +250,8 @@ function App() {
     };
   };
 
-  // Instructions
+  // Instructions string provider
+
   const getInstruction = () => {
     switch (generatorStep) {
       case 0:
@@ -283,27 +271,30 @@ function App() {
     <>
       <StyledApp onClick={generatorStart}>
         <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
-          <StyledControlPanel>
-            <h2>Control Panel</h2>
-            <span className="mobile-instructions">{getInstruction()}</span>
-            <label htmlFor="quantity">New points count:</label>
-            <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
-            <span>Points : {pointsCount.current}</span>
-            <StyledColorPicker>
-              <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
-              <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
-              <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
-              <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
-            </StyledColorPicker>
-            <StyledCPButton onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
-            <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}>Clear</StyledCPButton>
-            <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
-          </StyledControlPanel>
+          <Draggable
+            bounds='parent'
+          >
+            <StyledControlPanel>
+              <h2>Control Panel</h2>
+              <label htmlFor="quantity">New points:</label>
+              <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
+              <span>{pointsCount.current} points</span>
+              <StyledColorPicker>
+                <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
+                <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
+                <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
+                <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
+              </StyledColorPicker>
+              <StyledCPButton onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
+              <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}>Clear</StyledCPButton>
+              <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
+            </StyledControlPanel>
+          </Draggable>
         <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            height={window.innerHeight}
-            width={window.innerWidth}
+            height={dimensions.height}
+            width={dimensions.width}
           >
             {triangles.map(triangle=>(
               triangle.points.map(point=>(
