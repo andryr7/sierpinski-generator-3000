@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import SierpinskiBackground from './assets/bggrid.jpg';
 import { device, colors } from './style/stylevars';
 
@@ -61,28 +61,32 @@ const StyledControlPanel = styled.div`
   & input {
     border: inherit;
     width: 6rem;
-    font-size: 1rem;
+    font-size: 2rem;
     background-color: ${colors.darkblue};
     color: inherit;
+    @media ${device.mobile} {
+      font-size: 1.5rem;
+    };
   };
   & h2 {
     color: ${colors.pink};
-    @media ${device.mobile} {
+    @media ${device.tablet} {
       display: none;
     };
   }
   & span.mobile-instructions {
     display: none;
     @media ${device.tablet} {
-    display: block;
+      display: block;
     };
   }
   @media ${device.tablet} {
     font-size: 1.5rem;
     padding: 0.5rem;
+    gap: 0.25rem;
   };
   @media ${device.mobile} {
-    font-size: 1rem;
+    font-size: 1.5rem;
     flex-direction: row;
     padding: 0.5rem;
     flex-wrap: wrap;
@@ -101,8 +105,15 @@ const StyledCPButton = styled.div`
     color: ${colors.pink}
   };
   @media ${device.mobile} {
-    padding: 0.5rem;
+    padding: 0.25rem;
   };
+  &.disabled {
+    opacity: 0.5;
+    &:hover {
+      color: inherit;
+    };
+    cursor: auto;
+  }
 `
 
 const StyledColorPicker = styled.div`
@@ -284,9 +295,9 @@ function App() {
               <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
               <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
             </StyledColorPicker>
-            <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
-            <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
-            <StyledCPButton color="blue" onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
+            <StyledCPButton onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
+            <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}>Clear</StyledCPButton>
+            <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
           </StyledControlPanel>
         <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
           <svg 
