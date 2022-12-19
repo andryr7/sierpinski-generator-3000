@@ -14,25 +14,6 @@ const StyledApp = styled.div`
   background-size: cover;
   background-position: center;
   background-color: ${colors.darkblue};
-  /* @media ${device.mobile} {
-    filter: blur(1rem);
-  }; */
-`
-
-const StyledMobileWarning = styled.div`
-  display: none;
-  position: fixed;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  z-index: 5;
-  @media ${device.mobile} {
-    display: flex;
-    color: ${colors.pink};
-    font-size: 2.5rem;
-    text-align: center;
-  };
 `
 
 const StyledAppTitle = styled.h1`
@@ -140,7 +121,7 @@ const StyledColorPicker = styled.div`
 
 const StyledColorButton = styled.div`
   background-color: ${props=>props.color};
-  border: 1px outset;
+  border: 2px outset;
   height: 3rem;
   width: 3rem;
   cursor: pointer;
@@ -151,6 +132,9 @@ const StyledColorButton = styled.div`
     height: 2rem;
     width: 2rem;
   };
+  &.selected {
+    border-color: ${colors.pink};
+  }
 `
 
 const StyledDrawingContainer = styled.div`
@@ -286,10 +270,8 @@ function App() {
 
   return (
     <>
-      {/* <StyledMobileWarning>This website only works on desktop and tablets for now.</StyledMobileWarning> */}
       <StyledApp onClick={generatorStart}>
         <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
-        {/* <Draggable bounds="parent"> */}
           <StyledControlPanel>
             <h2>Control Panel</h2>
             <span className="mobile-instructions">{getInstruction()}</span>
@@ -297,16 +279,15 @@ function App() {
             <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
             <span>Points : {pointsCount.current}</span>
             <StyledColorPicker>
-              <StyledColorButton color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
-              <StyledColorButton color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
-              <StyledColorButton color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
-              <StyledColorButton color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
+              <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
+              <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
+              <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
+              <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
             </StyledColorPicker>
             <StyledCPButton color="green" onClick={()=>{setGeneratorStep(1)}}>Start</StyledCPButton>
             <StyledCPButton color="red" onClick={clearGenerator}>Clear</StyledCPButton>
             <StyledCPButton color="blue" onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
           </StyledControlPanel>
-        {/* </Draggable> */}
         <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
