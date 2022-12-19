@@ -3,6 +3,11 @@ import { useState, useRef, useEffect } from 'react';
 import SierpinskiBackground from './assets/bggrid.jpg';
 import { device, colors } from './style/stylevars';
 import Draggable from 'react-draggable';
+import addicon from './assets/add.svg';
+import deleteicon from './assets/delete.svg';
+import magicicon from './assets/magic.svg';
+import arrowupicon from './assets/arrowup.svg';
+import arrowdownicon from './assets/arrowdown.svg';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -36,9 +41,13 @@ const StyledAppTitle = styled.h1`
 const StyledAppInstructions = styled.span`
   position: absolute;
   bottom: 5vh;
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   color: ${colors.lightblue};
   text-align: center;
+  z-index: 1;
+  @media ${device.mobile} {
+    display: none;
+  };
 `
 
 const StyledControlPanel = styled.div`
@@ -56,15 +65,19 @@ const StyledControlPanel = styled.div`
   color: ${colors.lightblue};
   box-sizing: border-box;
   cursor: grab;
+  z-index: 2;
   & h2 {
     color: ${colors.pink};
   };
   & input {
     border: inherit;
     width: 6rem;
-    font-size: 2rem;
+    font-size: 1.5rem;
     background-color: ${colors.darkblue};
     color: inherit;
+  };
+  @media ${device.mobile} {
+    display: none;
   };
 `
 
@@ -87,7 +100,7 @@ const StyledCPButton = styled.div`
       color: inherit;
     };
     cursor: auto;
-  }
+  };
 `
 
 const StyledColorPicker = styled.div`
@@ -106,13 +119,13 @@ const StyledColorButton = styled.div`
   &:hover {
     color: ${colors.pink}
   };
-  @media ${device.mobile} {
-    height: 2rem;
-    width: 2rem;
-  };
   &.selected {
     border-color: ${colors.pink};
   }
+  @media ${device.mobile} {
+    height: 3rem;
+    width: 3rem;
+  };
 `
 
 const StyledDrawingContainer = styled.div`
@@ -120,6 +133,46 @@ const StyledDrawingContainer = styled.div`
   &.drawing {
     cursor: crosshair;
   }
+`
+
+const StyledMobileControlPanel = styled.div`
+  display: none;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  @media ${device.mobile} {
+    display: flex;
+  };
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: ${colors.darkblue};
+  border: 1px solid ${colors.lightblue};
+  color: ${colors.lightblue};
+  padding: 0.5rem;
+`
+
+const StyledMobileActions = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+`
+
+const StyledMobileActionButton = styled.div`
+  border: 1px solid;
+  padding: 0.5rem;
+  &.disabled {
+    opacity: 0.5;
+    cursor: auto;
+  };
+  cursor: pointer;
+`
+
+const StyledMobileExpandedActions = styled.div`
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
 `
 
 function App() {
@@ -130,6 +183,7 @@ function App() {
   let pointsCount = useRef(0);
   let lastPoint = useRef({});
   const [dimensions, setDimensions] = useState({height: window.innerHeight,width: window.innerWidth});
+  const [mobileMenuIsExpanded, setMobileMenuIsExpanded] = useState(false);
 
   // Listening for screen size changes to re-render page
 
@@ -276,9 +330,9 @@ function App() {
           >
             <StyledControlPanel>
               <h2>Control Panel</h2>
+              <span>{pointsCount.current} points</span>
               <label htmlFor="quantity">New points:</label>
               <input id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
-              <span>{pointsCount.current} points</span>
               <StyledColorPicker>
                 <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
                 <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
@@ -290,6 +344,27 @@ function App() {
               <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
             </StyledControlPanel>
           </Draggable>
+          <StyledMobileControlPanel>
+            {mobileMenuIsExpanded && (
+              <>
+                <StyledMobileExpandedActions>
+                  <input size="4" id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
+                  <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
+                  <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
+                  <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
+                  <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
+                
+                </StyledMobileExpandedActions>
+              </>
+            )}
+            <StyledMobileActions>
+              {!mobileMenuIsExpanded && (<StyledMobileActionButton onClick={()=>{setMobileMenuIsExpanded(true)}}><img src={arrowupicon}/></StyledMobileActionButton>)}
+              {mobileMenuIsExpanded && (<StyledMobileActionButton onClick={()=>{setMobileMenuIsExpanded(false)}}><img src={arrowdownicon}/></StyledMobileActionButton>)}
+              <StyledMobileActionButton onClick={()=>{setGeneratorStep(1)}}><img src={addicon}/></StyledMobileActionButton>
+              <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}><img src={deleteicon}/></StyledMobileActionButton>
+              <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}><img src={magicicon}/></StyledMobileActionButton>
+            </StyledMobileActions>
+          </StyledMobileControlPanel>
         <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
