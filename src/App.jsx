@@ -8,6 +8,9 @@ import deleteicon from './assets/delete.svg';
 import magicicon from './assets/magic.svg';
 import arrowupicon from './assets/arrowup.svg';
 import arrowdownicon from './assets/arrowdown.svg';
+import musiconicon from './assets/musicon.svg';
+import musicofficon from './assets/musicoff.svg';
+import useSound from 'use-sound';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -47,6 +50,19 @@ const StyledAppInstructions = styled.span`
   z-index: 1;
   @media ${device.mobile} {
     display: none;
+  };
+`
+
+const StyledMobileAppInstructions = styled.span`
+  display: none;
+  position: relative;
+  bottom: 8rem;
+  font-size: 1.5rem;
+  color: ${colors.lightblue};
+  text-align: center;
+  z-index: 1;
+  @media ${device.mobile} {
+    display: block;
   };
 `
 
@@ -175,15 +191,31 @@ const StyledMobileExpandedActions = styled.div`
   width: 100%;
 `
 
+const StyledMusicSettings = styled.div`
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  cursor: pointer;
+  @media ${device.mobile} {
+    bottom: 6rem;
+  };
+`
+
 function App() {
   const [triangles, setTriangles] = useState([]);
   const [generatorStep, setGeneratorStep] = useState(0);
-  const [newPointsCount, setNewPointsCount] = useState(25);
+  const [newPointsCount, setNewPointsCount] = useState(93);
   const [pointColor, setPointColor] = useState(colors.pink);
   let pointsCount = useRef(0);
   let lastPoint = useRef({});
   const [dimensions, setDimensions] = useState({height: window.innerHeight,width: window.innerWidth});
   const [mobileMenuIsExpanded, setMobileMenuIsExpanded] = useState(false);
+  const [musicIsPlaying, setMusicIsPlaying] = useState(false);
+  const [playMusic, { stop }] = useSound("/music.mp3", {
+    onend: () => {
+      setMusicIsPlaying(false);
+    },
+  });
 
   // Listening for screen size changes to re-render page
 
@@ -320,6 +352,35 @@ function App() {
         return "Click the draw points button";
     }
   };
+  
+  const getMobileInstruction = () => {
+    switch (generatorStep) {
+      case 0:
+        return "Click +";
+      case 1:
+        return "Draw the first point";
+      case 2:
+        return "Draw the second point";
+      case 3:
+        return "Draw the third point";
+      case 4:
+        return "Click the magic button";
+    }
+  };
+
+  // Music player handling
+  const HandleMusicClick = () => {
+    switch (musicIsPlaying) {
+      case false:
+        setMusicIsPlaying(true);
+        playMusic()
+        break;
+      case true:
+        setMusicIsPlaying(false);
+        stop()
+        break;
+    }
+  }
 
   return (
     <>
@@ -379,6 +440,8 @@ function App() {
           </svg>
         </StyledDrawingContainer>
         <StyledAppInstructions>{getInstruction()}</StyledAppInstructions>
+        <StyledMobileAppInstructions>{getMobileInstruction()}</StyledMobileAppInstructions>
+        <StyledMusicSettings onClick={HandleMusicClick}><img src={musicIsPlaying ? musiconicon : musicofficon}/></StyledMusicSettings>
       </StyledApp>
     </>
   )
