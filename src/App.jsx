@@ -52,6 +52,7 @@ const StyledMusicSettings = styled.div`
   cursor: pointer;
   @media ${device.mobile} {
     top: 0;
+    bottom: auto;
     right: 0;
   };
 `
