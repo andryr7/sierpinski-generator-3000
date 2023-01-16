@@ -1,5 +1,5 @@
-import styled from "styled-components"
-import { colors, device } from "../style/stylevars"
+import styled from 'styled-components';
+import { colors, device } from '../style/stylevars';
 import addicon from '../assets/add.svg';
 import deleteicon from '../assets/delete.svg';
 import magicicon from '../assets/magic.svg';
@@ -22,13 +22,13 @@ const StyledMobileControlPanel = styled.div`
   border: 1px solid ${colors.lightblue};
   color: ${colors.lightblue};
   padding: 0.5rem;
-`
+`;
 
 const StyledMobileActions = styled.div`
   display: flex;
   width: 100%;
   justify-content: space-around;
-`
+`;
 
 const StyledMobileActionButton = styled.div`
   border: 1px solid;
@@ -44,16 +44,16 @@ const StyledMobileActionButton = styled.div`
     border-color: ${colors.pink};
   }
   cursor: pointer;
-`
+`;
 
 const StyledMobileExpandedActions = styled.div`
   display: flex;
   justify-content: space-around;
   width: 100%;
-`
+`;
 
 const StyledColorButton = styled.div`
-background-color: ${props=>props.color};
+background-color: ${(props) => props.color};
 border: 2px outset;
 height: 2rem;
 width: 2rem;
@@ -68,42 +68,53 @@ cursor: pointer;
   height: 3rem;
   width: 3rem;
 };
-`
+`;
 
-export default function MobileControlPanel ({
+export default function MobileControlPanel({
   pointsCount,
-  pointColor, 
-  setPointColor, 
-  setGeneratorStep, 
-  clearGenerator, 
-  handleDrawPointsClick, 
+  pointColor,
+  setPointColor,
+  setGeneratorStep,
+  clearGenerator,
+  handleDrawPointsClick,
   newPointsCount,
   handlePointsCountChange,
   setMobileMenuIsExpanded,
-  mobileMenuIsExpanded
+  mobileMenuIsExpanded,
 }) {
-
   return (
     <StyledMobileControlPanel>
       {mobileMenuIsExpanded && (
-        <>
-          <StyledMobileExpandedActions>
-            <input size="4" id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
-            <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
-            <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
-            <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
-            <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
-          
-          </StyledMobileExpandedActions>
-        </>
+        <StyledMobileExpandedActions>
+          <input size="4" id="quantity" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange} />
+          <StyledColorButton className={pointColor === colors.pink ? 'selected' : ''} color={colors.pink} onClick={() => { setPointColor(colors.pink); }} />
+          <StyledColorButton className={pointColor === colors.lightblue ? 'selected' : ''} color={colors.lightblue} onClick={() => { setPointColor(colors.lightblue); }} />
+          <StyledColorButton className={pointColor === colors.green ? 'selected' : ''} color={colors.green} onClick={() => { setPointColor(colors.green); }} />
+          <StyledColorButton className={pointColor === colors.purple ? 'selected' : ''} color={colors.purple} onClick={() => { setPointColor(colors.purple); }} />
+
+        </StyledMobileExpandedActions>
       )}
       <StyledMobileActions>
-        {!mobileMenuIsExpanded && (<StyledMobileActionButton onClick={()=>{setMobileMenuIsExpanded(true)}}><img src={arrowupicon}/></StyledMobileActionButton>)}
-        {mobileMenuIsExpanded && (<StyledMobileActionButton onClick={()=>{setMobileMenuIsExpanded(false)}}><img src={arrowdownicon}/></StyledMobileActionButton>)}
-        <StyledMobileActionButton onClick={()=>{setGeneratorStep(1)}}><img src={addicon}/></StyledMobileActionButton>
-        <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}><img src={deleteicon}/></StyledMobileActionButton>
-        <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}><img src={magicicon}/></StyledMobileActionButton>
+        {!mobileMenuIsExpanded && (
+          <StyledMobileActionButton onClick={() => { setMobileMenuIsExpanded(true); }}>
+            <img alt="open menu icon" src={arrowupicon} />
+          </StyledMobileActionButton>
+        )}
+        {mobileMenuIsExpanded && (
+          <StyledMobileActionButton onClick={() => { setMobileMenuIsExpanded(false); }}>
+            <img alt="close menu icon" src={arrowdownicon} />
+          </StyledMobileActionButton>
+        )}
+        <StyledMobileActionButton onClick={() => { setGeneratorStep(1); }}>
+          <img alt="add triangle icon" src={addicon} />
+        </StyledMobileActionButton>
+        <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled' : ''} onClick={clearGenerator}>
+          <img alt="clear generator icon" src={deleteicon} />
+        </StyledMobileActionButton>
+        <StyledMobileActionButton className={pointsCount.current <= 2 ? 'disabled' : ''} onClick={handleDrawPointsClick}>
+          <img alt="create points icon" src={magicicon} />
+        </StyledMobileActionButton>
       </StyledMobileActions>
     </StyledMobileControlPanel>
-  )
+  );
 }

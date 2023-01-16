@@ -1,5 +1,5 @@
-import styled from "styled-components"
-import { colors, device } from "../style/stylevars"
+import styled from 'styled-components';
+import { colors, device } from '../style/stylevars';
 
 const StyledAppInstructions = styled.span`
   position: absolute;
@@ -11,7 +11,7 @@ const StyledAppInstructions = styled.span`
   @media ${device.mobile} {
     display: none;
   };
-`
+`;
 
 const StyledMobileAppInstructions = styled.span`
   display: none;
@@ -24,38 +24,37 @@ const StyledMobileAppInstructions = styled.span`
   @media ${device.mobile} {
     display: block;
   };
-`
+`;
 
-
-export default function Instructions ({ generatorStep }) {
+export default function Instructions({ generatorStep }) {
   // Instructions string provider
   const getInstruction = () => {
     switch (generatorStep) {
-      case 0:
-        return "Click start";
       case 1:
-        return "Draw the first point";
+        return 'Draw the first point';
       case 2:
-        return "Draw the second point";
+        return 'Draw the second point';
       case 3:
-        return "Draw the third point";
+        return 'Draw the third point';
       case 4:
-        return "Click the draw points button";
+        return 'Click the draw points button';
+      default:
+        return 'Click start';
     }
   };
-  
+
   const getMobileInstruction = () => {
     switch (generatorStep) {
-      case 0:
-        return "Click +";
       case 1:
-        return "Draw the first point";
+        return 'Draw the first point';
       case 2:
-        return "Draw the second point";
+        return 'Draw the second point';
       case 3:
-        return "Draw the third point";
+        return 'Draw the third point';
       case 4:
-        return "Click the magic button";
+        return 'Click the magic button';
+      default:
+        return 'Click +';
     }
   };
 
@@ -64,7 +63,5 @@ export default function Instructions ({ generatorStep }) {
       <StyledAppInstructions>{getInstruction()}</StyledAppInstructions>
       <StyledMobileAppInstructions>{getMobileInstruction()}</StyledMobileAppInstructions>
     </>
-  )
+  );
 }
-
-

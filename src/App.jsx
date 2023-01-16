@@ -76,6 +76,13 @@ function App() {
     },
   });
 
+  function handleWindowResize() {
+    setDimensions({
+      height: window.innerHeight,
+      width: window.innerWidth,
+    });
+  }
+
   // Listening for screen size changes to re-render page
   useEffect(() => {
     window.addEventListener('resize', handleWindowResize);
@@ -84,13 +91,6 @@ function App() {
     };
   });
 
-  function handleWindowResize() {
-    setDimensions({
-      height: window.innerHeight,
-      width: window.innerWidth,
-    });
-  }
-
   // Point generation functions
   const getRandomPoint = (triangle) => {
     switch (Math.floor(Math.random() * 3)) {
@@ -98,14 +98,14 @@ function App() {
         return (triangle.points.find((point) => point.id === 0));
       case 1:
         return (triangle.points.find((point) => point.id === 1));
-      case 2:
+      default:
         return (triangle.points.find((point) => point.id === 2));
     }
   };
 
   const drawNewPoints = () => {
     const newPoints = [];
-    for (let i = 0; i < newPointsCount; i + 1) {
+    for (let i = 0; i < newPointsCount; i += 1) {
       const referencepoint = getRandomPoint(triangles[triangles.length - 1]);
       const newPoint = {
         id: lastPoint.current.id + 1,
@@ -113,7 +113,7 @@ function App() {
         y: Math.round((lastPoint.current.y + referencepoint.y) / 2 * 100) / 100,
       };
       lastPoint.current = newPoint;
-      pointsCount.current++;
+      pointsCount.current += 1;
       newPoints.push(newPoint);
     }
     const updatedTriangle = triangles.pop();
@@ -122,54 +122,50 @@ function App() {
   };
 
   const handleDrawPointsClick = () => {
-    generatorStep === 4 && drawNewPoints();
+    if (generatorStep === 4) {
+      drawNewPoints();
+    }
   };
 
   // Generator engine
   const generatorStart = (event) => {
-    switch (generatorStep) {
-      case 1:
-        const newtriangle = {
-          id: 0,
-          color: pointColor,
-          points: [
-            {
-              id: 0,
-              x: event.clientX,
-              y: event.clientY,
-            },
-          ],
-        };
-        pointsCount.current++;
-        setTriangles((current) => [...current, newtriangle]);
-        setGeneratorStep(2);
-        break;
-      case 2:
-        const newtriangle2 = triangles.pop();
-        newtriangle2.points.push({
-          id: 1,
-          x: event.clientX,
-          y: event.clientY,
-        });
-        pointsCount.current++;
-        setTriangles((current) => [...current, newtriangle2]);
-        setGeneratorStep(3);
-        break;
-      case 3:
-        const newtriangle3 = triangles.pop();
-        const newPoint = {
-          id: 2,
-          x: event.clientX,
-          y: event.clientY,
-        };
-        pointsCount.current++;
-        newtriangle3.points.push(newPoint);
-        lastPoint.current = newPoint;
-        setTriangles((current) => [...current, newtriangle3]);
-        setGeneratorStep(4);
-        break;
-      default:
-        break;
+    if (generatorStep === 1) {
+      const newtriangle = {
+        id: 0,
+        color: pointColor,
+        points: [
+          {
+            id: 0,
+            x: event.clientX,
+            y: event.clientY,
+          },
+        ],
+      };
+      pointsCount.current += 1;
+      setTriangles((current) => [...current, newtriangle]);
+      setGeneratorStep(2);
+    } else if (generatorStep === 2) {
+      const newtriangle2 = triangles.pop();
+      newtriangle2.points.push({
+        id: 1,
+        x: event.clientX,
+        y: event.clientY,
+      });
+      pointsCount.current += 1;
+      setTriangles((current) => [...current, newtriangle2]);
+      setGeneratorStep(3);
+    } else if (generatorStep === 3) {
+      const newtriangle3 = triangles.pop();
+      const newPoint = {
+        id: 2,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      pointsCount.current += 1;
+      newtriangle3.points.push(newPoint);
+      lastPoint.current = newPoint;
+      setTriangles((current) => [...current, newtriangle3]);
+      setGeneratorStep(4);
     }
   };
 
@@ -191,13 +187,13 @@ function App() {
   // Music player handling
   const HandleMusicClick = () => {
     switch (musicIsPlaying) {
-      case false:
-        setMusicIsPlaying(true);
-        playMusic();
-        break;
       case true:
         setMusicIsPlaying(false);
         stop();
+        break;
+      default:
+        setMusicIsPlaying(true);
+        playMusic();
         break;
     }
   };
@@ -243,7 +239,9 @@ function App() {
         </svg>
       </StyledDrawingContainer>
       <Instructions generatorStep={generatorStep} />
-      <StyledMusicSettings onClick={HandleMusicClick}><img src={musicIsPlaying ? musiconicon : musicofficon} /></StyledMusicSettings>
+      <StyledMusicSettings onClick={HandleMusicClick}>
+        <img alt="music button icon" src={musicIsPlaying ? musiconicon : musicofficon} />
+      </StyledMusicSettings>
     </StyledApp>
   );
 }
