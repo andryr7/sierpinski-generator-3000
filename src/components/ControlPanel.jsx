@@ -1,6 +1,7 @@
-import styled from "styled-components"
-import { colors, device } from "../style/stylevars"
+import { useRef } from 'react';
+import styled from 'styled-components';
 import Draggable from 'react-draggable';
+import { colors, device } from '../style/stylevars';
 
 const StyledControlPanel = styled.div`
 background-color: ${colors.darkblue};
@@ -31,7 +32,7 @@ z-index: 2;
 @media ${device.mobile} {
   display: none;
 };
-`
+`;
 
 const StyledCPButton = styled.div`
 border: 1px outset;
@@ -53,17 +54,17 @@ box-sizing: border-box;
   };
   cursor: auto;
 };
-`
+`;
 
 const StyledColorPicker = styled.div`
 cursor: pointer;
 display: flex;
 justify-content: space-between;
 width: 100%;
-`
+`;
 
 const StyledColorButton = styled.div`
-background-color: ${props=>props.color};
+background-color: ${(props) => props.color};
 border: 2px outset;
 height: 2rem;
 width: 2rem;
@@ -78,38 +79,45 @@ cursor: pointer;
   height: 3rem;
   width: 3rem;
 };
-`
+`;
 
-export default function ControlPanel ({
+function ControlPanel({
   pointsCount,
-  pointColor, 
-  setPointColor, 
-  setGeneratorStep, 
-  clearGenerator, 
-  handleDrawPointsClick, 
+  pointColor,
+  setPointColor,
+  setGeneratorStep,
+  clearGenerator,
+  handleDrawPointsClick,
   newPointsCount,
-  handlePointsCountChange
+  handlePointsCountChange,
 }) {
+  const nodeRef = useRef(null);
 
   return (
-    <Draggable bounds='parent'>
-      <StyledControlPanel>
+    <Draggable bounds="parent" nodeRef={nodeRef}>
+      <StyledControlPanel ref={nodeRef}>
         <h2>Control Panel</h2>
-        <span>{pointsCount.current} points</span>
-        <label htmlFor="newpointscount">New points:</label>
-        <input id="newpointscount" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange}></input>
+        <span>
+          {pointsCount.current}
+          {' '}
+          points
+        </span>
+        <label htmlFor="newpointscount">
+          New points:
+          <input id="newpointscount" type="number" min="1" max="999" maxLength="3" value={newPointsCount} onChange={handlePointsCountChange} />
+        </label>
         <StyledColorPicker>
-          <StyledColorButton className={pointColor===colors.pink?'selected':''} color={colors.pink} onClick={()=>{setPointColor(colors.pink)}}/>
-          <StyledColorButton className={pointColor===colors.lightblue?'selected':''} color={colors.lightblue} onClick={()=>{setPointColor(colors.lightblue)}}/>
-          <StyledColorButton className={pointColor===colors.green?'selected':''} color={colors.green} onClick={()=>{setPointColor(colors.green)}}/>
-          <StyledColorButton className={pointColor===colors.purple?'selected':''} color={colors.purple} onClick={()=>{setPointColor(colors.purple)}}/>
+          <StyledColorButton className={pointColor === colors.pink ? 'selected' : ''} color={colors.pink} onClick={() => { setPointColor(colors.pink); }} />
+          <StyledColorButton className={pointColor === colors.lightblue ? 'selected' : ''} color={colors.lightblue} onClick={() => { setPointColor(colors.lightblue); }} />
+          <StyledColorButton className={pointColor === colors.green ? 'selected' : ''} color={colors.green} onClick={() => { setPointColor(colors.green); }} />
+          <StyledColorButton className={pointColor === colors.purple ? 'selected' : ''} color={colors.purple} onClick={() => { setPointColor(colors.purple); }} />
         </StyledColorPicker>
-        <StyledCPButton onClick={()=>{setGeneratorStep(1)}}>Start new</StyledCPButton>
-        <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={clearGenerator}>Clear</StyledCPButton>
-        <StyledCPButton className={pointsCount.current <= 2 ? 'disabled':''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
+        <StyledCPButton onClick={() => { setGeneratorStep(1); }}>Start new</StyledCPButton>
+        <StyledCPButton className={pointsCount.current <= 2 ? 'disabled' : ''} onClick={clearGenerator}>Clear</StyledCPButton>
+        <StyledCPButton className={pointsCount.current <= 2 ? 'disabled' : ''} onClick={handleDrawPointsClick}>Draw points</StyledCPButton>
       </StyledControlPanel>
     </Draggable>
-  )
+  );
 }
 
-
+export default ControlPanel;
