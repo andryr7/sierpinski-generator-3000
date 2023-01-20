@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import useSound from 'use-sound';
 import SierpinskiBackground from './assets/bggrid.jpg';
@@ -8,6 +8,8 @@ import musicofficon from './assets/musicoff.svg';
 import ControlPanel from './components/ControlPanel';
 import MobileControlPanel from './components/MobileControlPanel';
 import Instructions from './components/Instructions';
+import backgroundsquare from './assets/backgroundsquare.png';
+import NoiseFilter from './components/NoiseFilter';
 
 const StyledApp = styled.div`
   width: 100%;
@@ -16,10 +18,12 @@ const StyledApp = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-image: url(${SierpinskiBackground});
+  background: linear-gradient(#05004D, #2D0842, #05004D);
+  z-index: 0;
+  /* background-image: url(${SierpinskiBackground});
   background-size: cover;
   background-position: center;
-  background-color: ${colors.darkblue};
+  background-color: ${colors.darkblue}; */
 `;
 
 const StyledAppTitle = styled.h1`
@@ -29,6 +33,7 @@ const StyledAppTitle = styled.h1`
   font-family: 'Broadway Gradient 3D', sans-serif;
   color: ${colors.lightblue};
   text-align: center;
+  z-index: 2;
   @media ${device.tablet} {
     top: 2vh;
     font-size: 4rem;
@@ -40,6 +45,7 @@ const StyledAppTitle = styled.h1`
 
 const StyledDrawingContainer = styled.div`
   cursor: auto;
+  z-index: 1;
   &.drawing {
     cursor: crosshair;
   }
@@ -50,11 +56,33 @@ const StyledMusicSettings = styled.div`
   right: 10px;
   bottom: 10px;
   cursor: pointer;
+  z-index: 2;
   @media ${device.mobile} {
     top: 0;
     bottom: auto;
     right: 0;
   };
+`;
+
+const baserotation = keyframes`
+  0% {
+    transform: translateY(23%) rotateX(80deg) rotateZ(0deg);
+  }
+  100% {
+    transform: translateY(23%) rotateX(80deg) rotateZ(360deg);
+  }
+`;
+
+const BottomBackground = styled.div`
+  width: 200vh;
+  height: 200vh;
+  position: fixed;
+  background-image: url(${backgroundsquare});
+  background-size: 7% 7%;
+  background-repeat: repeat;
+  animation: ${baserotation} 60s linear infinite;
+  border-radius: 50%;
+  opacity: 0.75;
 `;
 
 function App() {
@@ -200,6 +228,7 @@ function App() {
 
   return (
     <StyledApp onClick={generatorStart}>
+      <NoiseFilter />
       <StyledAppTitle>Sierpinski Generator 3000</StyledAppTitle>
       <ControlPanel
         pointsCount={pointsCount}
@@ -225,6 +254,7 @@ function App() {
         pointColor={pointColor}
         setPointColor={setPointColor}
       />
+      <BottomBackground className="TEST" />
       <StyledDrawingContainer className={generatorStep === 1 || generatorStep === 2 || generatorStep === 3 ? 'drawing' : ''}>
         <svg
           xmlns="http://www.w3.org/2000/svg"

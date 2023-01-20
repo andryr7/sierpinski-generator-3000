@@ -22,6 +22,7 @@ const StyledMobileControlPanel = styled.div`
   border: 1px solid ${colors.lightblue};
   color: ${colors.lightblue};
   padding: 0.5rem;
+  z-index: 2;
 `;
 
 const StyledMobileActions = styled.div`
